@@ -5,11 +5,7 @@ import sbt.Keys._
 
 object DSbt extends Plugin {
 
-  val Config = config("d-sbt") extend (Compile)
-
-  val distDirectory = SettingKey[File](
-    "dist-directory", "name of directory containing distribution"
-  )
+  val Config = config("sbt-dir") extend (Compile)
 
   val libsDirectory = SettingKey[File](
     "lib-directory", "name of directory containing libraries"
@@ -25,7 +21,6 @@ object DSbt extends Plugin {
 
   val buildDist = InputKey[Unit]("build-dist", "")
   val distSettings: Seq[sbt.Project.Setting[_]] = Seq(
-    distDirectory := new File("dist"),
     libsDirectory := new File("dist") / "lib",
     transferDirectories := Seq.empty,
     transferFilesInto := Seq.empty,
