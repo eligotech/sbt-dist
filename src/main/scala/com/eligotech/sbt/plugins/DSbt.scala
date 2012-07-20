@@ -5,7 +5,7 @@ import sbt.Keys._
 
 object DSbt extends Plugin {
 
-  val Config = config("sbt-dir") extend (Compile)
+//  val Config = config("sbt-dist") extend (Compile)
 
   val libsDirectory = SettingKey[File](
     "lib-directory", "name of directory containing libraries"
@@ -19,25 +19,23 @@ object DSbt extends Plugin {
     "copy-file-into", "copy file into specified directory"
   )
 
-  val buildDist = InputKey[Unit]("build-dist", "")
-  val distSettings: Seq[sbt.Project.Setting[_]] = Seq(
+  val buildDist = TaskKey[Unit]("build-dist", "")
+  val distSettings: Seq[sbt.Project.Setting[_]] =  Seq(
     libsDirectory := new File("dist") / "lib",
     transferDirectories := Seq.empty,
     transferFilesInto := Seq.empty,
     buildDist <<= createDistribution
   )
 
-  private def createDistribution = inputTask {
-    (argTask: TaskKey[Seq[String]]) =>
-      (argTask, update, DSbt.libsDirectory, DSbt.transferDirectories, DSbt.transferFilesInto, artifactPath in Compile in packageBin) map {
-        (argTask, upd, libs, dirCopies, fileCopies, artifactFile) =>
+  private def createDistribution =
+      (update, DSbt.libsDirectory, DSbt.transferDirectories, DSbt.transferFilesInto, artifactPath in Compile in packageBin) map {
+        (upd, libs, dirCopies, fileCopies, artifactFile) =>
           println("copying %s" format (artifactFile))
           copyDependencies(upd, libs)
           copyBulkDirectories(dirCopies)
           copySingleFiles(fileCopies)
           IO.copyFile(artifactFile, libs / artifactFile.getName)
       }
-  }
 
   private def copySingleFiles(filesToCopy: Iterable[(File, File)]) {
     filesToCopy.foreach {
@@ -56,8 +54,7 @@ object DSbt extends Plugin {
   }
 
   private def copyDependencies(updateReport: Id[UpdateReport], libs: File) {
-    IO.delete(libs)
-    IO.createDirectory(libs)
+    if (!libs.exists) IO.createDirectory(libs)
     updateReport.select(Set("compile", "runtime")) foreach {
       file =>
         IO.copyFile(file, libs / file.getName)
