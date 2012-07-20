@@ -1,4 +1,4 @@
-sbt-dist
-========
+d-sbt
+=====
 
-Small plugin to create an application distribution
+Isolate in same plugin concepts repetitively used in sbt distribution tasks
