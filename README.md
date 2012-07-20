@@ -23,14 +23,27 @@ Then initialise the plugin settings as following
             ...)
             .settings(DSbt.distSettings: _*)
 
+**Important**
+
+In the context of an multi-module project one should deactivate the parallelExecution as in
+
+      lazy val samiksa = Project(
+        ...)
+        .settings(parallelExecution in DSbt.buildDist := false)
+        .settings(DSbt.distSettings: _*)
+        .settings(DSbt.transferDirectories  := Seq((new File("scripts") -> new File("dist/scripts"))))
+        .aggregate(commons, core, webCollectors, akkaPipeline, enhancers, archivers, rotten)
+
+
 distSettings exposes 3 environment settings
 
  + libsDirectory a File abstraction pointing the directory containing file copies of the dependencies
  + transferDirectories providing a list of directory transfers apply from source directories to target directories
  + transferFilesInto providing a list of File to copy in destination directories
 
-For example if one wants to make a bulk copy of a set of scripts files :
+**Notice that the artifact files will be automatically copied into the libsDirectory**
 
+For example if one wants to make a bulk copy of a set of scripts files :
 
           lazy val samiksa = Project(
             ...)
@@ -47,12 +60,5 @@ The distribution is executed launching the command
 
 >build-dist
 
-
-
-Known bugs
------------
-
-In the context of a multi-module project configuration, concurrent access to shared libraries can be
-noticed resulting in a failure of the build. Work around: a second run typically solve the problem (we are working on it)
 
 
