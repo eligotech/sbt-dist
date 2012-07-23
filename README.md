@@ -1,6 +1,25 @@
 sbt-dist
 =========
 
+Getting the sbt-dist plugin
+----------------------------
+
+The sbt-dist plugin can be cloned from git using the line command
+
+> git clone git@github.com:eligotech/sbt-dist.git
+
+
+The project has been implemented using version 11.3 of sbt.
+Scala Cross version compilation has been activated including versions 2.9.1 and 2.9.2
+
+Not sure of your scala version ? Then publish it locally for both versions using the line
+command:
+
+> +publish-local
+
+pre-pending the command with the **+** symbol
+
+
 Installation
 --------------
 
@@ -43,12 +62,14 @@ distSettings exposes 3 environment settings
 
 **Notice that the artifact files will be automatically copied into the libsDirectory**
 
-For example if one wants to make a bulk copy of a set of scripts files :
+For example if one wants to make a bulk copy of a set of scripts files in a scripts directory and copy a specific Mahout model in a
+sentiment directory,  one will provide the following definition:
 
           lazy val samiksa = Project(
             ...)
             .settings(DSbt.distSettings: _*)
             .settings(DSbt.transferDirectories  := Seq((new File("scripts") -> new File("dist/scripts"))))
+            .settings(DSbt.transferFilesInto  := Seq((new File("modules/rotten/sentiment/model") -> new File("dist/sentiment"))))
 
 
 Execution
