@@ -56,10 +56,11 @@ In the context of an multi-module project one should deactivate the parallelExec
 
 distSettings exposes 3 environment settings
 
- + libsDirectory a File abstraction pointing the directory containing file copies of the dependencies
+ + libsDirectory a File abstraction pointing the directory containing file copies of the dependencies.
  + transferDirectories providing a list of directory transfers apply from source directories to target directories
  + transferFilesInto providing a list of File to copy in destination directories
 
+**The Default value of the libsDirectory is dist/lib**
 **Notice that the artifact files will be automatically copied into the libsDirectory**
 
 For example if one wants to make a bulk copy of a set of scripts files in a scripts directory and copy a specific Mahout model in a
