@@ -82,5 +82,11 @@ The distribution is executed launching the command
 
 >build-dist
 
+One can clean the distribution files only using the line command
+
+>clean-dist
+
+
+
 
 

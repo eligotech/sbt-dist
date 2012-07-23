@@ -18,12 +18,16 @@ object DSbt extends Plugin {
 
   val buildDist = TaskKey[Unit]("build-dist", "")
 
+  val distClean = TaskKey[Unit]("clean-dist", "Remove dist files.")
+
   val distSettings: Seq[sbt.Project.Setting[_]] =  Seq(
     libsDirectory := new File("dist") / "lib",
     transferDirectories := Seq.empty,
     transferFilesInto := Seq.empty,
-    buildDist <<= createDistribution
+    buildDist <<= createDistribution,
+    distClean <<= clean
   )
+
 
   private def createDistribution =
       (update, DSbt.libsDirectory, DSbt.transferDirectories, DSbt.transferFilesInto, artifactPath in Compile in packageBin) map {
@@ -58,4 +62,19 @@ object DSbt extends Plugin {
         IO.copyFile(file, libs / file.getName)
     }
   }
+
+  private def clean =
+    (DSbt.libsDirectory, DSbt.transferDirectories, DSbt.transferFilesInto) map { (libs, dirs, fileTransfer) =>
+      fileTransfer foreach { pair =>
+        val (_, targetDir) = pair
+        IO.delete(targetDir)
+      }
+
+      dirs foreach { pair =>
+        val (_, targetDir) = pair
+        IO.delete(targetDir)
+      }
+
+      IO.delete(libs)
+    }
 }
