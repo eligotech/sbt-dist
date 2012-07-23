@@ -25,7 +25,7 @@ object DSbt extends Plugin {
     transferDirectories := Seq.empty,
     transferFilesInto := Seq.empty,
     buildDist <<= createDistribution,
-    distClean <<= clean
+    distClean <<= cleanDist
   )
 
 
@@ -63,7 +63,7 @@ object DSbt extends Plugin {
     }
   }
 
-  private def clean =
+  private def cleanDist =
     (DSbt.libsDirectory, DSbt.transferDirectories, DSbt.transferFilesInto) map { (libs, dirs, fileTransfer) =>
       fileTransfer foreach { pair =>
         val (_, targetDir) = pair
