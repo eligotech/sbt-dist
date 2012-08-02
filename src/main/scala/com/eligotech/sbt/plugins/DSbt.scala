@@ -59,7 +59,7 @@ object DSbt extends Plugin {
     if (!libs.exists) IO.createDirectory(libs)
     updateReport.select(Set("compile", "runtime")) foreach {
       file =>
-        IO.copyFile(file, libs / file.getName)
+        if (!file.getName.contains("-source")) IO.copyFile(file, libs / file.getName)
     }
   }
 
