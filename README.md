@@ -57,8 +57,11 @@ In the context of an multi-module project one should deactivate the parallelExec
 distSettings exposes 3 environment settings
 
  + libsDirectory a File abstraction pointing the directory containing file copies of the dependencies.
+ + excludeLibs as set of excluding rules allowing to exclude some libraries.
+A rule is a function taking a file name as a parameter and returning a boolean true value if the file is to be excluded
  + transferDirectories providing a list of directory transfers apply from source directories to target directories
  + transferFilesInto providing a list of File to copy in destination directories
+
 
 **The Default value of the libsDirectory is dist/lib**
 **Notice that the artifact files will be automatically copied into the libsDirectory**
@@ -76,7 +79,7 @@ sentiment directory,  one will provide the following definition:
 Execution
 -------------
 
-Always execute a package command before using the plugin
+Always execute a **package command** before using the plugin
 
 The distribution is executed launching the command
 
