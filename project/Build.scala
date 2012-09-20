@@ -16,11 +16,25 @@ object BuildSettings {
     organization        := "com.eligotech",
     crossScalaVersions  := Seq("2.9.1", "2.9.2"),
     sbtPlugin           := true,
-    version             := "0.1-SNAPSHOT",
+    version             := "0.2-SNAPSHOT",
     scalaVersion        := scalaVer,
     scalacOptions       := Seq("-unchecked", "-deprecation"),
     //doesn't work
     ivyValidate := false
+  )
+}
+
+object PublishSettings {
+  val publishSettings = Seq(
+    publishTo <<= version { (v: String) =>
+      val nexus = "http://repo.eligotech.com/nexus/"
+      if (v.trim.endsWith("SNAPSHOT"))
+        Some("snapshots" at nexus + "content/repositories/snapshots")
+      else
+        Some("releases"  at nexus + "content/repositories/releases")
+    },
+    credentials += Credentials(Path.userHome / ".sbt" / "sonatype.credentials"),
+    publishMavenStyle := true
   )
 }
 
@@ -35,4 +49,5 @@ object ApplicationBuild extends Build {
     settings =  buildSettings ++
       Seq(resolvers ++= Seq(typesafeReleases, scalaToolsRepo))
   )
+  .settings( PublishSettings.publishSettings:_* )
 }

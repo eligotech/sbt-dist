@@ -2,10 +2,18 @@ package com.eligotech.sbt.plugins
 
 import sbt._
 import sbt.Keys._
-import util.matching.Regex
+import scala.util.control.Exception._
+
 
 object DSbt extends Plugin {
   type FileFilter = (String) => Boolean
+
+  // TODO add more archive types
+  trait DistType
+  case object Zip extends DistType
+
+  
+  val baseDist = file("dist")
 
   val libsDirectory = SettingKey[File](
     "lib-directory", "name of directory containing libraries"
@@ -22,17 +30,25 @@ object DSbt extends Plugin {
   val transferFilesInto = SettingKey[Iterable[(File, File)]](
     "copy-file-into", "copy file into specified directory"
   )
+  
+  val distType = SettingKey[DistType](
+    "dist-type", "sets the type of distribution (zip, or simple dir)"
+  )
 
-  val buildDist = TaskKey[Unit]("build-dist", "")
+  val buildDist = TaskKey[Unit]("build-dist", "")    
 
   val distClean = TaskKey[Unit]("clean-dist", "Remove dist files.")
+  
+  val archiveDist = TaskKey[File]("archive-dist", "Creates an archive of the distribution")
 
   val distSettings: Seq[sbt.Project.Setting[_]] =  Seq(
-    libsDirectory := new File("dist") / "lib",
+    libsDirectory := baseDist / "lib",
     excludeLibs := Seq(filterSourceFile),
     transferDirectories := Seq.empty,
-    transferFilesInto := Seq.empty,
+    transferFilesInto := Seq.empty,    
     buildDist <<= createDistribution,
+    distType := Zip,
+    archiveDist <<= createArchive,
     distClean <<= cleanDist
   )
 
@@ -51,7 +67,36 @@ object DSbt extends Plugin {
           copySingleFiles(fileCopies)
           IO.copyFile(artifactFile, libs / artifactFile.getName)
       }
+  
+  private def createArchive =
+    (DSbt.transferDirectories, DSbt.transferFilesInto, DSbt.distType, name, version) map { (dirs, files, distType, distName, distVersion) =>
+      distType match {
+        case Zip => createZip(( dirs ++ files).unzip._2, "%s-%s.zip" format (distName, distVersion))
 
+      }
+    }
+
+  private def createZip(files: Iterable[File], name: String): File = {
+    require (
+      files.filter(!_.exists()).isEmpty ,
+      "Missing files in assembly. Make sure all required files have been added to the distribution."
+    )
+
+    val toZip = files flatMap { f  =>  f ** -DirectoryFilter x relativeTo(baseDist) }
+
+    println("creating zip from : ")
+    toZip foreach println
+
+    println("packaging files ...")
+    catching(classOf[java.util.zip.ZipException]) either { IO.zip ( toZip, baseDist / name ) } match {
+      case Left(t) => {
+        sys.error("Unable to create zip. Make sure the distribution is created first by running \"build-dist\"")
+      }
+      case _ => baseDist / name
+    }
+  }
+
+  
   private def copySingleFiles(filesToCopy: Iterable[(File, File)]) {
     filesToCopy.foreach {
       entry =>
@@ -90,7 +135,8 @@ object DSbt extends Plugin {
         val (_, targetDir) = pair
         IO.delete(targetDir)
       }
-
+      
       IO.delete(libs)
+      
     }
 }
