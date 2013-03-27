@@ -4,7 +4,6 @@ import sbt._
 import sbt.Keys._
 import scala.util.control.Exception._
 
-
 object DSbt extends Plugin with Logging {
   type FileFilter = (String) => Boolean
 
@@ -64,13 +63,13 @@ object DSbt extends Plugin with Logging {
     exclusionRules.find(rule => rule.apply(file.getName)).isEmpty
 
   private def createDistribution =
-      (update, baseDirectory, DSbt.libsDirectory, DSbt.excludeLibs, DSbt.transferDirectories, DSbt.transferFilesInto, artifactPath in Compile in packageBin) map {
-        (upd, baseDir, libs, exclude, dirCopies, fileCopies, artifactFile) =>
+      (update, baseDirectory, DSbt.libsDirectory, DSbt.excludeLibs, DSbt.transferDirectories, DSbt.transferFilesInto, artifactPath in Compile in packageBin, fullClasspath in Compile) map {
+        (upd, baseDir, libs, exclude, dirCopies, fileCopies, artifactFile, fullClassPath) =>
           logInfo("copying %s" format (artifactFile))
-          copyDependencies(upd, libs, exclude)
+          copyDependencies(fullClassPath, libs, exclude)
           copyBulkDirectories(baseDir, dirCopies)
           copySingleFiles(baseDir, fileCopies)
-          IO.copyFile(artifactFile, libs / artifactFile.getName)
+          IO.copyFile(artifactFile, baseDist / artifactFile.getName)
       }
   
   private def createArchive =
@@ -138,9 +137,11 @@ object DSbt extends Plugin with Logging {
     }
   }
 
-  private def copyDependencies(updateReport: Id[UpdateReport], libs: File, exclusionRules: Iterable[FileFilter]) {
+  private def copyDependencies(fullClassPath: Id[Keys.Classpath], libs: File, exclusionRules: Iterable[FileFilter]) {
     if (!libs.exists) IO.createDirectory(libs)
-    updateReport.select(Set("compile", "runtime")) foreach { file =>
+    fullClassPath.collect {
+      case f if f.data.isFile => f.data
+    } foreach { file =>
         if (compliant(file, exclusionRules)) IO.copyFile(file, libs / file.getName)
     }
   }
