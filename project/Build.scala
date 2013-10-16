@@ -14,9 +14,9 @@ object BuildSettings {
   import Properties._
   lazy val buildSettings = Defaults.defaultSettings ++ Seq (
     organization        := "com.eligotech",
-    crossScalaVersions  := Seq("2.9.1", "2.9.2", "2.10.0"),
+    crossScalaVersions  := Seq("2.10.0"),
     sbtPlugin           := true,
-    version             := "0.3-SNAPSHOT",
+    version             := "0.4-SNAPSHOT",
     scalaVersion        := scalaVer,
     scalacOptions       := Seq("-unchecked", "-deprecation"),
     //doesn't work
