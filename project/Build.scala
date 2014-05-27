@@ -16,7 +16,7 @@ object BuildSettings {
     organization        := "com.eligotech",
     crossScalaVersions  := Seq("2.10.3"),
     sbtPlugin           := true,
-    version             := "0.4",
+    version             := "0.5-SNAPSHOT",
     scalaVersion        := scalaVer,
     scalacOptions       := Seq("-unchecked", "-deprecation"),
     //doesn't work
